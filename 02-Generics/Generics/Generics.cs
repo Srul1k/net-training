@@ -27,7 +27,7 @@ namespace Task.Generics {
 		///   { new TimeSpan(1, 0, 0), new TimeSpan(0, 0, 30) } => "01:00:00,00:00:30",
 		/// </example>
 		public static string ConvertToString<T>(this IEnumerable<T> list){
-			return string.Join<T>(ListSeparator.ToString(), list);
+			return string.Join(ListSeparator.ToString(), list);
 		}
 
 		/// <summary>
@@ -121,20 +121,21 @@ namespace Task.Generics {
 	/// </example>
 	
 	public static class Singleton<T> where T : new() {
-		private static T value = new T();
-		private static object locker = new object();
+		private static T _value = new T();
+		private static object _locker = new object();
 
 		public static T Instance {
 			get{
-				lock (locker)
+				lock (_locker)
 				{
-					return value;
+					return _value;
 				}
 			}
 		}
 	}
 
 	public static class FunctionExtentions {
+		private const int _limitOfWebException = 2;
 		/// <summary>
 		///   Tries to invoke the specified function up to 3 times if the result is unavailable 
 		/// </summary>
@@ -158,7 +159,7 @@ namespace Task.Generics {
 				{
 					Trace.WriteLine(ex);
 
-					if (i == 2) throw ex;
+					if (i == _limitOfWebException) throw ex;
 				}
 			}
 
