@@ -586,8 +586,8 @@ namespace EnumerableTest
                ("ApplicationTrustCollection,Array,ArrayList,AuthorizationRuleCollection,BaseChannelObjectWithProperties,BaseChannelSinkWithProperties,"
                +"BaseChannelWithProperties,BitArray,Collection`1,CollectionBase,CommonAcl,ConcurrentDictionary`2,ConcurrentQueue`1,ConcurrentStack`1,Dictionary`2,"
                +"DictionaryBase,DiscretionaryAcl,Evidence,GenericAcl,Hashtable,ICollection,ICollection`1,IdentityReferenceCollection,IDictionary,IDictionary`2,"
-               +"IEnumerable`1,IList,IList`1,IProducerConsumerCollection`1,IResourceReader,KeyCollection,KeyContainerPermissionAccessEntryCollection,KeyedCollection`2,"
-               +"List`1,NamedPermissionSet,PermissionSet,Queue,RawAcl,ReadOnlyCollection`1,ReadOnlyCollectionBase,ReadOnlyPermissionSet,ResourceReader,ResourceSet,SortedList,"
+               + "IEnumerable,IEnumerable`1,IList,IList`1,IProducerConsumerCollection`1,IResourceReader,KeyCollection,KeyContainerPermissionAccessEntryCollection,KeyedCollection`2,"
+               + "List`1,NamedPermissionSet,PermissionSet,Queue,RawAcl,ReadOnlyCollection`1,ReadOnlyCollectionBase,ReadOnlyPermissionSet,ResourceReader,ResourceSet,SortedList,"
                + "Stack,String,SystemAcl,ValueCollection,ArraySegment`1,ReadOnlyDictionary`2,IReadOnlyCollection`1,IReadOnlyList`1,IReadOnlyDictionary`2").Split(new[] {','}),
                 "GetIEnumerableTypesNames should return right results"
                 );
