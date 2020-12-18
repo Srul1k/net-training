@@ -30,7 +30,10 @@ namespace Collections.Tasks {
         ///   12 => { 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144 }
         /// </example>
         public static IEnumerable<int> GetFibonacciSequence(int count) {
-            if (count < 0) throw new ArgumentException();
+            if (count < 0)
+            {
+                throw new ArgumentException();
+            }
 
             int item = 0;
             int nextItem = 1;
@@ -58,8 +61,11 @@ namespace Collections.Tasks {
         ///   {"TextReader","is","the","abstract","base","class","of","StreamReader","and","StringReader","which",...}
         /// </example>
         public static IEnumerable<string> Tokenize(TextReader reader) {
-            if (reader == null) throw new ArgumentNullException();
-            char[] delimeters = new[] { ',', ' ', '.', '\t', '\n' };
+            if (reader == null)
+            {
+                throw new ArgumentNullException();
+            }
+            char[] delimeters = { ',', ' ', '.', '\t', '\n' };
 
             string line = reader.ReadLine();
             var buffer = new List<string>();
@@ -97,7 +103,10 @@ namespace Collections.Tasks {
         ///    result = { 1, 2, 3, 4, 5, 6, 7, 8 } 
         /// </example>
         public static IEnumerable<T> DepthTraversalTree<T>(ITreeNode<T> root) {
-            if (root == null) throw new ArgumentNullException();
+            if (root == null)
+            {
+                throw new ArgumentNullException();
+            }
 
             var task = new Stack<ITreeNode<T>>();
             task.Push(root);
@@ -139,7 +148,10 @@ namespace Collections.Tasks {
         ///    result = { 1, 2, 3, 4, 5, 6, 7, 8 } 
         /// </example>
         public static IEnumerable<T> WidthTraversalTree<T>(ITreeNode<T> root) {
-            if (root == null) throw new ArgumentNullException();
+            if (root == null)
+            {
+                throw new ArgumentNullException();
+            }
 
             var task = new Queue<ITreeNode<T>>();
             task.Enqueue(root);
@@ -180,16 +192,20 @@ namespace Collections.Tasks {
         /// </example>
         public static IEnumerable<T[]> GenerateAllPermutations<T>(T[] source, int count){
             if (count < 0 || source.Length < count)
+            {
                 throw new ArgumentOutOfRangeException();
+            }
             if (count == 0)
+            {
                 return new List<T[]>();
+            }
 
             List<T[]> result = new List<T[]>();
             T[] currentPermutation = new T[count];
 
-            permute(0, 0);
+            GetPermutatons(0, 0);
 
-            void permute(int counter, int startPos)
+            void GetPermutatons(int counter, int startPos)
             {
                 int endPos = source.Length - count + counter;
                 for (int i = startPos; i <= endPos; i++)
@@ -200,7 +216,7 @@ namespace Collections.Tasks {
                         result.Add(currentPermutation.ToArray());
                         continue;
                     }
-                    permute(counter + 1, i + 1);
+                    GetPermutatons(counter + 1, i + 1);
                 }
             }
 
@@ -231,7 +247,10 @@ namespace Collections.Tasks {
         ///   Person cached = cache.GetOrBuildValue(10, ()=>LoadPersonById(10) );  // should get a Person from the cache
         /// </example>
         public static TValue GetOrBuildValue<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> builder) {
-            if (!dictionary.ContainsKey(key)) dictionary.Add(key, builder());
+            if (!dictionary.ContainsKey(key))
+            {
+                dictionary.Add(key, builder());
+            }
             return dictionary[key];
         }
 
