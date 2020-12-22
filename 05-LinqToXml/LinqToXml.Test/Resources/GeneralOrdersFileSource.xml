@@ -24,6 +24,6 @@
   </Orders>
   <products>
     <product Id="1" Value="300" />
-    <Product Id="2" Value="910" />
+    <product Id="2" Value="910" />
   </products>
 </Root>

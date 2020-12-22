@@ -16,7 +16,20 @@ namespace LinqToXml
         /// <returns>Xml representation (refer to CreateHierarchyResultFile.xml in Resources)</returns>
         public static string CreateHierarchy(string xmlRepresentation)
         {
-            throw new NotImplementedException();
+            var groups = XElement
+                .Parse(xmlRepresentation)
+                .Elements("Data")
+                .GroupBy(e => (string)e.Element("Category"));
+
+            return new XElement("Root",
+                    groups.Select(group => 
+                        new XElement("Group", 
+                            new XAttribute("ID", group.Key),
+                            group.Select(e =>
+                                new XElement("Data",
+                                    e.Element("Quantity"),
+                                    e.Element("Price"))))))
+                .ToString();
         }
 
         /// <summary>
@@ -29,7 +42,18 @@ namespace LinqToXml
         /// </example>
         public static string GetPurchaseOrders(string xmlRepresentation)
         {
-            throw new NotImplementedException();
+            XNamespace aw = "http://www.adventure-works.com";
+
+            var numbers = XDocument
+                .Parse(xmlRepresentation)
+                .Descendants(aw + "Address")
+                .Where(adress =>
+                    adress.Attribute(aw + "Type").Value == "Shipping" &&
+                    adress.Element(aw + "State").Value == "NY")
+                .Select(adress =>
+                    adress.Parent.Attribute(aw + "PurchaseOrderNumber").Value);
+
+            return String.Join(",", numbers);
         }
 
         /// <summary>
@@ -39,7 +63,26 @@ namespace LinqToXml
         /// <returns>Xml customers representation (refer to XmlFromCsvResultFile.xml in Resources)</returns>
         public static string ReadCustomersFromCsv(string customers)
         {
-            throw new NotImplementedException();
+            IEnumerable<string[]> customersAsIEnumerable = customers
+                .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(cus => cus
+                    .Split(','));
+
+            return new XElement("Root",
+                    customersAsIEnumerable.Select(fields =>
+                        new XElement("Customer",
+                            new XAttribute("CustomerID", fields[0]),
+                            new XElement("CompanyName", fields[1]),
+                            new XElement("ContactName", fields[2]),
+                            new XElement("ContactTitle", fields[3]),
+                            new XElement("Phone", fields[4]),
+                            new XElement("FullAddress",
+                                new XElement("Address", fields[5]),
+                                new XElement("City", fields[6]),
+                                new XElement("Region", fields[7]),
+                                new XElement("PostalCode", fields[8]),
+                                new XElement("Country", fields[9])))))
+                .ToString();
         }
 
         /// <summary>
@@ -49,7 +92,11 @@ namespace LinqToXml
         /// <returns>Concatenation of all this element values.</returns>
         public static string GetConcatenationString(string xmlRepresentation)
         {
-            throw new NotImplementedException();
+            return XDocument
+                .Parse(xmlRepresentation)
+                .Elements()
+                .Aggregate("", (str, e) => String.Join("", e.Value))
+                .ToString();
         }
 
         /// <summary>
@@ -59,7 +106,13 @@ namespace LinqToXml
         /// <returns>Xml representation with contacts (refer to ReplaceCustomersWithContactsResult.xml in Resources)</returns>
         public static string ReplaceAllCustomersWithContacts(string xmlRepresentation)
         {
-            throw new NotImplementedException();
+            XElement root = XElement.Parse(xmlRepresentation);
+            
+            root.ReplaceAll(root
+                    .Elements("customer")
+                    .Select(e => new XElement("contact", e.Elements())));
+
+            return root.ToString();
         }
 
         /// <summary>
@@ -69,7 +122,17 @@ namespace LinqToXml
         /// <returns>Sequence of channels ids</returns>
         public static IEnumerable<int> FindChannelsIds(string xmlRepresentation)
         {
-            throw new NotImplementedException();
+            return XElement
+                .Parse(xmlRepresentation)
+                .Elements("channel")
+                .Where(channel =>
+                    channel.Elements("subscriber").Count() >= 2 &&
+                    channel.Nodes().OfType<XComment>().Any(x => x.Value == "DELETE"))
+                .Aggregate(new List<int>(), (ids, channel) =>
+                {
+                    ids.Add(Int32.Parse(channel.Attribute("id").Value));
+                    return ids;
+                });
         }
 
         /// <summary>
@@ -79,7 +142,17 @@ namespace LinqToXml
         /// <returns>Sorted customers representation (refer to GeneralCustomersResultFile.xml in Resources)</returns>
         public static string SortCustomers(string xmlRepresentation)
         {
-            throw new NotImplementedException();
+            IEnumerable<XElement> root = XElement
+                .Parse(xmlRepresentation)
+                .Elements()
+                .OrderBy(c => c
+                    .Element("FullAddress")
+                        .Element("Country").Value)
+                .ThenBy(c => c
+                    .Element("FullAddress")
+                        .Element("City").Value);
+
+            return new XElement("Root", root).ToString();
         }
 
         /// <summary>
@@ -92,7 +165,7 @@ namespace LinqToXml
         /// </example>
         public static string GetFlattenString(XElement xmlRepresentation)
         {
-            throw new NotImplementedException();
+            return xmlRepresentation.ToString();
         }
 
         /// <summary>
@@ -102,7 +175,18 @@ namespace LinqToXml
         /// <returns>Total purchase value</returns>
         public static int GetOrdersValue(string xmlRepresentation)
         {
-            throw new NotImplementedException();
+            var products = XElement
+                .Parse(xmlRepresentation)
+                .Elements("products")
+                .Elements("product")
+                .ToDictionary(key => key.Attribute("Id").Value,
+                value => Int32.Parse(value.Attribute("Value").Value));
+
+            return XElement.Parse(xmlRepresentation)
+                .Elements("Orders")
+                .Elements("Order")
+                .Elements("product")
+                .Sum(e => products[e.Value]);
         }
     }
 }
