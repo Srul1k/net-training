@@ -34,6 +34,7 @@ namespace AsyncIO.Tests.Extentions
         {
             if (Filter != null && !Filter.ShouldTrace(eventCache, source, eventType, id, message, null, null, null))
                 return;
+
             TraceEventCore(eventCache, source, eventType, id, message);
         }
 
@@ -115,7 +116,7 @@ namespace AsyncIO.Tests.Extentions
 
         private static readonly Dictionary<Regex, Action<Match>> stateMachine = new Dictionary<Regex, Action<Match>> { 
             { 
-                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:HttpWebRequest\((?<url>\S+)\#(-?)(\d+)\)"),
+                new Regex(@"\[(?<tid>\d+)\] Entering HttpWebRequest\#(?<id>\d+)\:\:HttpWebRequest\((?<url>\S+)\#(-?)(\d+)\)"),
                 m => GetHttpRequest(m.IntValue("id")).Url = m.StringValue("url")
             },
             { 
