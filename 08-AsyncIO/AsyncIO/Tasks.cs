@@ -20,8 +20,7 @@ namespace AsyncIO
         /// <returns>The sequence of downloaded url content</returns>
         public static IEnumerable<string> GetUrlContent(this IEnumerable<Uri> uris) 
         {
-            // TODO : Implement GetUrlContent
-            throw new NotImplementedException();
+            return uris.Select(uri => new WebClient().DownloadString(uri));
         }
 
 
@@ -30,15 +29,26 @@ namespace AsyncIO
         /// Returns the content of required uris.
         /// Method has to use the asynchronous way and can be used to compare the performace of sync \ async approaches. 
         /// 
-        /// maxConcurrentStreams parameter should control the maximum of concurrent streams that are running at the same time (throttling). 
+        ///  
         /// </summary>
         /// <param name="uris">Sequence of required uri</param>
         /// <param name="maxConcurrentStreams">Max count of concurrent request streams</param>
         /// <returns>The sequence of downloaded url content</returns>
         public static IEnumerable<string> GetUrlContentAsync(this IEnumerable<Uri> uris, int maxConcurrentStreams)
         {
-            // TODO : Implement GetUrlContentAsync
-            throw new NotImplementedException();
+            var tasks = new List<Task<string>>();
+
+            foreach (var uri in uris)
+            {
+                if (tasks.Count(task => task != null) >= maxConcurrentStreams)
+                {
+                    Task.WaitAny(tasks.Where(task => task != null).ToArray());
+                }
+
+                tasks.Add(new WebClient().DownloadStringTaskAsync(uri));
+            }
+
+            return tasks.Select(task => task.Result);
         }
 
 
@@ -50,10 +60,12 @@ namespace AsyncIO
         /// </summary>
         /// <param name="resource">Uri of resource</param>
         /// <returns>MD5 hash</returns>
-        public static Task<string> GetMD5Async(this Uri resource)
+        public static async Task<string> GetMD5Async(this Uri resource)
         {
-            // TODO : Implement GetMD5Async
-            throw new NotImplementedException();
+            byte[] hash = MD5.Create()
+                .ComputeHash(await new WebClient().DownloadDataTaskAsync(resource));
+
+            return String.Concat(hash.Select(b => b.ToString("x2")));
         }
 
     }
