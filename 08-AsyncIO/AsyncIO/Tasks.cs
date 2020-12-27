@@ -36,21 +36,36 @@ namespace AsyncIO
         /// <returns>The sequence of downloaded url content</returns>
         public static IEnumerable<string> GetUrlContentAsync(this IEnumerable<Uri> uris, int maxConcurrentStreams)
         {
-            var tasks = new List<Task<string>>();
-
-            foreach (var uri in uris)
-            {
-                if (tasks.Count(task => task != null) >= maxConcurrentStreams)
-                {
-                    Task.WaitAny(tasks.Where(task => task != null).ToArray());
-                }
-
-                tasks.Add(new WebClient().DownloadStringTaskAsync(uri));
-            }
-
-            return tasks.Select(task => task.Result);
+            return Helper(uris, maxConcurrentStreams).GetAwaiter().GetResult();
         }
 
+        public static async Task<IEnumerable<string>> Helper(IEnumerable<Uri> uris, int maxConcurrentStreams)
+        {
+            var queue = new Queue<Uri>(uris);
+            var result = new List<string>();
+            var tasks = new List<Task<string>>(maxConcurrentStreams);
+
+            while (queue.Count > 0 && tasks.Count < maxConcurrentStreams)
+            {
+                tasks.Add(new WebClient().DownloadStringTaskAsync(queue.Dequeue()));
+            }
+
+            while (tasks.Count > 0)
+            {
+                var taskDone = await Task.WhenAny(tasks);
+                tasks.Remove(taskDone);
+                result.Add(await taskDone);
+
+
+
+                if (queue.Count > 0)
+                {
+                    tasks.Add(new WebClient().DownloadStringTaskAsync(queue.Dequeue()));
+                }
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Calculates MD5 hash of required resource.
