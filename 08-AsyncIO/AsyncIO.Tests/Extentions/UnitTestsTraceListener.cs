@@ -140,7 +140,7 @@ namespace AsyncIO.Tests.Extentions
                 m => GetHttpStream(m.IntValue("cid")).IsAsync = false
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] ConnectStream\#(?<cid>\d+) - Sending headers"),
+                new Regex(@"\[(?<tid>\d+)\] ConnectStream\#(?<cid>\d+) - Отправка заголовков"),
                 m => StreamClosed(m.IntValue("cid"))
             },
             { 
@@ -148,7 +148,7 @@ namespace AsyncIO.Tests.Extentions
                 m => StreamClosed(m.IntValue("cid"))
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:\(\) - Error code"),
+                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:\(\) - Код ошибки"),
                 m => CloseAllStreams(m.IntValue("id"))
             }
 
