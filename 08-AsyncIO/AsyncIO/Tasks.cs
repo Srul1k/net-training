@@ -42,7 +42,6 @@ namespace AsyncIO
         public static async Task<IEnumerable<string>> Helper(IEnumerable<Uri> uris, int maxConcurrentStreams)
         {
             var queue = new Queue<Uri>(uris);
-            var result = new List<string>();
             var tasks = new List<Task<string>>(maxConcurrentStreams);
 
             while (queue.Count > 0 && tasks.Count < maxConcurrentStreams)
@@ -54,9 +53,6 @@ namespace AsyncIO
             {
                 var taskDone = await Task.WhenAny(tasks);
                 tasks.Remove(taskDone);
-                result.Add(await taskDone);
-
-
 
                 if (queue.Count > 0)
                 {
@@ -64,7 +60,7 @@ namespace AsyncIO
                 }
             }
 
-            return result;
+            return tasks.Select(task => task.Result);
         }
 
         /// <summary>
