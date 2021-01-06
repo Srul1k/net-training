@@ -34,6 +34,7 @@ namespace AsyncIO.Tests.Extentions
         {
             if (Filter != null && !Filter.ShouldTrace(eventCache, source, eventType, id, message, null, null, null))
                 return;
+            
             TraceEventCore(eventCache, source, eventType, id, message);
         }
 
@@ -115,7 +116,7 @@ namespace AsyncIO.Tests.Extentions
 
         private static readonly Dictionary<Regex, Action<Match>> stateMachine = new Dictionary<Regex, Action<Match>> { 
             { 
-                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:HttpWebRequest\((?<url>\S+)\#(-?)(\d+)\)"),
+                new Regex(@"\[(?<tid>\d+)\] Entering HttpWebRequest\#(?<id>\d+)\:\:HttpWebRequest\((?<url>\S+)\#(-?)(\d+)\)"),
                 m => GetHttpRequest(m.IntValue("id")).Url = m.StringValue("url")
             },
             { 
@@ -123,31 +124,31 @@ namespace AsyncIO.Tests.Extentions
                 m => AddHttpStream(m.IntValue("id"), m.IntValue("cid"))
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:BeginGetResponse\(\)"),
+                new Regex(@"\[(?<tid>\d+)\] Entering HttpWebRequest\#(?<id>\d+)\:\:BeginGetResponse\(\)"),
                 m => GetHttpRequest(m.IntValue("id")).IsAsync = true
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:GetResponse\(\)"),
+                new Regex(@"\[(?<tid>\d+)\] Entering HttpWebRequest\#(?<id>\d+)\:\:GetResponse\(\)"),
                 m => GetHttpRequest(m.IntValue("id")).IsAsync = false
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] ConnectStream\#(?<cid>\d+)\:\:BeginRead\(\)"),
+                new Regex(@"\[(?<tid>\d+)\] Entering ConnectStream\#(?<cid>\d+)\:\:BeginRead\(\)"),
                 m => GetHttpStream(m.IntValue("cid")).IsAsync = true
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] ConnectStream\#(?<cid>\d+)\:\:Read\(\)"),
+                new Regex(@"\[(?<tid>\d+)\] Entering ConnectStream\#(?<cid>\d+)\:\:Read\(\)"),
                 m => GetHttpStream(m.IntValue("cid")).IsAsync = false
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] ConnectStream\#(?<cid>\d+) - Sending headers"),
+                new Regex(@"\[(?<tid>\d+)\] ConnectStream\#(?<cid>\d+) - Отправка заголовков"),
                 m => StreamClosed(m.IntValue("cid"))
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] ConnectStream\#(?<cid>\d+)\:\:Close\(\)"),
+                new Regex(@"\[(?<tid>\d+)\] Entering ConnectStream\#(?<cid>\d+)\:\:Close\(\)"),
                 m => StreamClosed(m.IntValue("cid"))
             },
             { 
-                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:\(\) - Error code"),
+                new Regex(@"\[(?<tid>\d+)\] HttpWebRequest\#(?<id>\d+)\:\:\(\) - Код ошибки"),
                 m => CloseAllStreams(m.IntValue("id"))
             }
 

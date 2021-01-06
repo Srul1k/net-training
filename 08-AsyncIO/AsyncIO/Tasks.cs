@@ -20,8 +20,7 @@ namespace AsyncIO
         /// <returns>The sequence of downloaded url content</returns>
         public static IEnumerable<string> GetUrlContent(this IEnumerable<Uri> uris) 
         {
-            // TODO : Implement GetUrlContent
-            throw new NotImplementedException();
+            return uris.Select(uri => new WebClient().DownloadString(uri));
         }
 
 
@@ -30,17 +29,39 @@ namespace AsyncIO
         /// Returns the content of required uris.
         /// Method has to use the asynchronous way and can be used to compare the performace of sync \ async approaches. 
         /// 
-        /// maxConcurrentStreams parameter should control the maximum of concurrent streams that are running at the same time (throttling). 
+        ///  
         /// </summary>
         /// <param name="uris">Sequence of required uri</param>
         /// <param name="maxConcurrentStreams">Max count of concurrent request streams</param>
         /// <returns>The sequence of downloaded url content</returns>
         public static IEnumerable<string> GetUrlContentAsync(this IEnumerable<Uri> uris, int maxConcurrentStreams)
         {
-            // TODO : Implement GetUrlContentAsync
-            throw new NotImplementedException();
+            return Helper(uris, maxConcurrentStreams).GetAwaiter().GetResult();
         }
 
+        public static async Task<IEnumerable<string>> Helper(IEnumerable<Uri> uris, int maxConcurrentStreams)
+        {
+            var queue = new Queue<Uri>(uris);
+            var tasks = new List<Task<string>>(maxConcurrentStreams);
+
+            while (queue.Count > 0 && tasks.Count < maxConcurrentStreams)
+            {
+                tasks.Add(new WebClient().DownloadStringTaskAsync(queue.Dequeue()));
+            }
+
+            while (tasks.Count > 0)
+            {
+                var taskDone = await Task.WhenAny(tasks);
+                tasks.Remove(taskDone);
+
+                if (queue.Count > 0)
+                {
+                    tasks.Add(new WebClient().DownloadStringTaskAsync(queue.Dequeue()));
+                }
+            }
+
+            return tasks.Select(task => task.Result);
+        }
 
         /// <summary>
         /// Calculates MD5 hash of required resource.
@@ -50,10 +71,12 @@ namespace AsyncIO
         /// </summary>
         /// <param name="resource">Uri of resource</param>
         /// <returns>MD5 hash</returns>
-        public static Task<string> GetMD5Async(this Uri resource)
+        public static async Task<string> GetMD5Async(this Uri resource)
         {
-            // TODO : Implement GetMD5Async
-            throw new NotImplementedException();
+            byte[] hash = MD5.Create()
+                .ComputeHash(await new WebClient().DownloadDataTaskAsync(resource));
+
+            return String.Concat(hash.Select(b => b.ToString("x2")));
         }
 
     }
