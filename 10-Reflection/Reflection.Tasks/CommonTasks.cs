@@ -45,14 +45,12 @@ namespace Reflection.Tasks
         public static T GetPropertyValue<T>(this object obj, string propertyPath) {
             var properties = propertyPath.Split('.');
 
-            for (int i = 0; i < properties.Length - 1; i++)
+            for (int i = 0; i < properties.Length; i++)
             {
                 obj = obj.GetType().GetProperty(properties[i]).GetValue(obj);
             }
 
-            var property = obj.GetType().GetProperty(properties.Last()).GetValue(obj);
-
-            return (T)property;
+            return (T)obj;
         }
 
 
