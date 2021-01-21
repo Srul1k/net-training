@@ -23,8 +23,32 @@ namespace Reflection.Tasks
         ///   The generated dynamic method should be equal to static MultuplyVectors (see below).   
         /// </returns>
         public static Func<T[], T[], T> GetVectorMultiplyFunction<T>() where T : struct {
-            // TODO : Implement GetVectorMultiplyFunction<T>.
-            throw new NotImplementedException();
+            var first = Expression.Parameter(typeof(T[]), "first");
+            var second = Expression.Parameter(typeof(T[]), "second");
+
+            var result = Expression.Variable(typeof(T), "result");
+            var i = Expression.Variable(typeof(int), "i");
+
+            var breakLabel = Expression.Label("break");
+            var loop = Expression.Loop(
+                Expression.Block(
+                    Expression.IfThen(
+                        Expression.Equal(Expression.ArrayLength(first), i),
+                        Expression.Break(breakLabel)),
+                    Expression.AddAssign(result,
+                        Expression.Multiply(
+                            Expression.ArrayAccess(first, i),
+                            Expression.ArrayAccess(second, i))),
+                    Expression.PostIncrementAssign(i)),
+                breakLabel);
+
+            var block = Expression.Block(new[] { i, result },
+                Expression.Assign(i, Expression.Constant(0)),
+                Expression.Assign(result, Expression.Convert(i, typeof(T))),
+                loop,
+                result);
+
+            return Expression.Lambda<Func<T[], T[], T>>(block, new[] { first, second }).Compile();
         } 
 
 

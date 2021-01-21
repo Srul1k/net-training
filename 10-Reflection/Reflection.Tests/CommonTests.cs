@@ -87,7 +87,7 @@ namespace Reflection.Tests
 
         [TestMethod]
         [TestCategory("SetProperty method")]
-        public void GetProperty_Should_Assign_Value_For_Complex_Path()
+        public void SetProperty_Should_Assign_Value_For_Complex_Path()
         {
             var manager = new Manager("Joe", "Smith");
             var worker = new Worker("Willy", "Brown", manager);

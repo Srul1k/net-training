@@ -16,8 +16,13 @@ namespace Reflection.Tasks
         /// <param name="assemblyName">name of assembly</param>
         /// <returns>List of public but obsolete classes</returns>
         public static IEnumerable<string> GetPublicObsoleteClasses(string assemblyName) {
-            // TODO : Implement GetPublicObsoleteClasses method
-            throw new NotImplementedException();
+            return Assembly
+                .Load(assemblyName)
+                .GetTypes()
+                .Where(t => t.IsClass &&
+                            t.IsPublic &&
+                            t.GetCustomAttributes(typeof(ObsoleteAttribute)).Any())
+                .Select(c => c.Name);
         }
 
         /// <summary>
@@ -38,8 +43,14 @@ namespace Reflection.Tasks
         /// <param name="propertyPath">dot-separated property path</param>
         /// <returns>property value of obj for required propertyPath</returns>
         public static T GetPropertyValue<T>(this object obj, string propertyPath) {
-            // TODO : Implement GetPropertyValue method
-            throw new NotImplementedException();
+            var properties = propertyPath.Split('.');
+
+            for (int i = 0; i < properties.Length; i++)
+            {
+                obj = obj.GetType().GetProperty(properties[i]).GetValue(obj);
+            }
+
+            return (T)obj;
         }
 
 
@@ -60,8 +71,20 @@ namespace Reflection.Tasks
         /// <param name="propertyPath">dot-separated property path</param>
         /// <param name="value">assigned value</param>
         public static void SetPropertyValue(this object obj, string propertyPath, object value) {
-            // TODO : Implement SetPropertyValue method
-            throw new NotImplementedException();
+            var properties = propertyPath.Split('.');
+
+            for (int i = 0; i < properties.Length - 1; i++)
+            {
+                obj = obj.GetType().GetProperty(properties[i]).GetValue(obj);
+            }
+
+            var type = obj.GetType();
+            while (!type.GetProperty(properties.Last()).CanWrite)
+            {
+                type = type.BaseType;
+            }
+
+            type.GetProperty(properties.Last()).SetValue(obj, value);
         }
 
 
